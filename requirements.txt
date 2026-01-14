@@ -1,0 +1,6 @@
+flask
+pymupdf
+pillow
+reportlab
+gunicorn
+werkzeug
