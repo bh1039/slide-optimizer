@@ -64,7 +64,7 @@ HTML_TEMPLATE = """
             </select>
           </div>
           <div>
-            <label class="block text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">Quality (DPI)</label>
+            <label class="block text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">Quality (DPI MAX 300)</label>
             <input id="dpi" type="number" value="200" max="300" class="input-field w-full p-3 rounded text-sm" />
           </div>
         </div>
