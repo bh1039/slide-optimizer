@@ -31,77 +31,65 @@ HTML_TEMPLATE = """
     .btn-primary:hover { background: #4d5d4d; color: #ffffff; }
     .drop-zone--over { border-color: #8b9a8b; background: #2a2d2a; }
     .accent-brown { color: #a39081; }
+    select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-6">
   <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
     
     <div class="card p-8 rounded-lg shadow-2xl">
-      <h1 class="text-2xl font-light mb-1 tracking-tight">Slide <span class="accent-brown italic">Optimizer</span></h1>
-      <p class="text-xs text-slate-500 mb-8 uppercase tracking-widest">Handout Generation Tool</p>
+      <h1 class="text-2xl font-light mb-1 tracking-tight text-zinc-100">Slide <span class="accent-brown italic font-serif">Optimizer</span></h1>
+      <p class="text-[10px] text-zinc-500 mb-8 uppercase tracking-[0.2em] font-bold">Minimalist Handout Engine</p>
 
-      <div id="dropZone" class="border border-dashed border-zinc-700 rounded-md p-10 text-center cursor-pointer transition-all mb-6">
-        <p class="text-sm text-zinc-400" id="fileLabel">Drop PDF or PowerPoint</p>
+      <div id="dropZone" class="border border-dashed border-zinc-800 rounded-md p-10 text-center cursor-pointer transition-all mb-6 hover:border-zinc-600">
+        <p class="text-xs text-zinc-500" id="fileLabel">Attach PDF or PowerPoint Source</p>
         <input type="file" id="fileInput" class="hidden" accept=".pdf,.pptx,.ppt" />
       </div>
 
-      <div class="space-y-4">
+      <div class="space-y-5">
         <div>
-          <label class="block text-xs font-semibold text-zinc-500 uppercase mb-1">Custom Output Name</label>
-          <input id="outName" type="text" placeholder="optimized_handout" class="input-field w-full p-3 rounded text-sm" />
+          <label class="block text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">Filename</label>
+          <input id="outName" type="text" placeholder="optimized_handout" class="input-field w-full p-3 rounded text-sm placeholder:text-zinc-700" />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-zinc-500 uppercase mb-1">Layout</label>
-            <select id="slidesPerPage" class="input-field w-full p-3 rounded text-sm appearance-none">
+            <label class="block text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">Layout</label>
+            <select id="slidesPerPage" class="input-field w-full p-3 rounded text-sm">
+              <option value="auto" selected>Auto-Detect</option>
               <option value="1">1 Slide</option>
               <option value="2">2 Slides</option>
-              <option value="4" selected>4 Slides</option>
+              <option value="4">4 Slides</option>
               <option value="6">6 Slides</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-zinc-500 uppercase mb-1">DPI (Max 300)</label>
+            <label class="block text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest">Quality (DPI)</label>
             <input id="dpi" type="number" value="200" max="300" class="input-field w-full p-3 rounded text-sm" />
           </div>
         </div>
       </div>
 
-      <button id="processBtn" class="btn-primary w-full mt-8 py-4 rounded font-medium text-sm tracking-widest uppercase">
-        Process Document
+      <button id="processBtn" class="btn-primary w-full mt-10 py-4 rounded text-[11px] font-bold tracking-[0.25em] uppercase shadow-lg">
+        Begin Processing
       </button>
 
       <div id="status" class="mt-6 hidden text-center">
-        <span class="text-xs italic text-zinc-500 animate-pulse">Processing engine running...</span>
+        <span class="text-[10px] uppercase tracking-widest text-zinc-600 animate-pulse">Reconstructing document...</span>
       </div>
     </div>
 
-    <div class="flex flex-col justify-center p-4 border-l border-zinc-800">
-      <h2 class="text-sm font-semibold uppercase tracking-widest mb-6 accent-brown">Capabilities</h2>
-      <ul class="space-y-6">
-        <li class="flex items-start gap-4">
-          <span class="text-zinc-600 text-xs">01</span>
-          <div>
-            <p class="text-sm font-medium">Multi-Format Support</p>
-            <p class="text-xs text-zinc-500">Native conversion for .pptx and .pdf using LibreOffice headless.</p>
-          </div>
-        </li>
-        <li class="flex items-start gap-4">
-          <span class="text-zinc-600 text-xs">02</span>
-          <div>
-            <p class="text-sm font-medium">Print Optimization</p>
-            <p class="text-xs text-zinc-500">Standard 8.5x11" output with smart scaling to eliminate white space.</p>
-          </div>
-        </li>
-        <li class="flex items-start gap-4">
-          <span class="text-zinc-600 text-xs">03</span>
-          <div>
-            <p class="text-sm font-medium">Safety Bounds</p>
-            <p class="text-xs text-zinc-500">Auto-capped quality to ensure fast processing and server stability.</p>
-          </div>
-        </li>
-      </ul>
+    <div class="flex flex-col justify-center p-4">
+      <div class="space-y-8 max-w-xs mx-auto">
+        <div class="border-l-2 border-zinc-800 pl-4">
+          <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Automated Logic</h3>
+          <p class="text-xs text-zinc-500 leading-relaxed">System analyzes slide dimensions to choose between a 2-up landscape or 4-up portrait grid automatically.</p>
+        </div>
+        <div class="border-l-2 border-zinc-800 pl-4">
+          <h3 class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Constraints</h3>
+          <p class="text-xs text-zinc-500 leading-relaxed">Input limited to 50MB. DPI is server-capped at 300 to ensure rendering stability.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -117,15 +105,13 @@ HTML_TEMPLATE = """
     function handleFile(file) {
         selectedFile = file;
         $('fileLabel').textContent = file.name;
-        $('fileLabel').style.color = "#a39081";
+        $('fileLabel').className = "text-xs accent-brown italic";
     }
 
     $('processBtn').onclick = async () => {
-        if (!selectedFile) return alert("Select a file");
+        if (!selectedFile) return alert("Source file missing");
         
-        let dpiVal = parseInt($('dpi').value);
-        if (dpiVal > 300) { alert("DPI capped at 300 for stability."); dpiVal = 300; }
-
+        const dpiVal = Math.min(parseInt($('dpi').value) || 200, 300);
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('slides_per_page', $('slidesPerPage').value);
@@ -137,7 +123,7 @@ HTML_TEMPLATE = """
 
         try {
             const response = await fetch('/optimize', { method: 'POST', body: formData });
-            if (!response.ok) throw new Error("Processing error");
+            if (!response.ok) throw new Error("Processing failure");
             
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -157,22 +143,30 @@ HTML_TEMPLATE = """
 """
 
 def process_file(input_pdf, output_pdf, slides_per_page, dpi):
-    # Enforce DPI cap on backend
     dpi = min(int(dpi), 300)
     pdf_document = fitz.open(input_pdf)
     total_slides = len(pdf_document)
-    images = []
+    
+    # Render first page to determine orientation for "Auto" mode
     zoom = dpi / 72
     mat = fitz.Matrix(zoom, zoom)
-    
+    images = []
     for page in pdf_document:
         pix = page.get_pixmap(matrix=mat)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
         images.append(img)
+    
+    img_w, img_h = images[0].size
+    is_landscape = img_w > img_h
     pdf_document.close()
 
+    # Automatic Logic
+    if slides_per_page == 'auto':
+        s_p_p = 2 if is_landscape else 4
+    else:
+        s_p_p = int(slides_per_page)
+
     page_width, page_height = letter
-    s_p_p = int(slides_per_page)
     layouts = {1:(1,1), 2:(1,2), 4:(2,2), 6:(2,3)}
     cols, rows = layouts.get(s_p_p, (2,2))
     
@@ -180,7 +174,6 @@ def process_file(input_pdf, output_pdf, slides_per_page, dpi):
     cw = (page_width - (2*margin) - (cols-1)*gap) / cols
     ch = (page_height - (2*margin) - (rows-1)*gap) / rows
     
-    img_w, img_h = images[0].size
     scale = min(cw/img_w, ch/img_h)
     sw, sh = img_w*scale, img_h*scale
 
@@ -193,7 +186,7 @@ def process_file(input_pdf, output_pdf, slides_per_page, dpi):
             x = margin + col*(cw+gap) + (cw-sw)/2
             y = page_height - margin - (row+1)*ch - row*gap + (ch-sh)/2
             c.drawImage(ImageReader(images[idx]), x, y, width=sw, height=sh)
-            c.setStrokeColorRGB(0.3, 0.3, 0.3) # Darker borders for minimalist look
+            c.setStrokeColorRGB(0.2, 0.2, 0.2)
             c.rect(x, y, sw, sh)
             idx += 1
         c.showPage()
@@ -206,9 +199,7 @@ def index():
 @app.route('/optimize', methods=['POST'])
 def optimize():
     file = request.files.get('file')
-    custom_name = secure_filename(request.form.get('out_name', 'output'))
-    if not custom_name: custom_name = "output"
-    
+    custom_name = secure_filename(request.form.get('out_name', 'optimized_handout'))
     filename = secure_filename(file.filename)
     input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(input_path)
