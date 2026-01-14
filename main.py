@@ -11,7 +11,6 @@ import subprocess
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-# Limit file uploads to 50MB
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = tempfile.gettempdir()
 
@@ -24,55 +23,84 @@ HTML_TEMPLATE = """
   <title>Slide Optimizer Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: linear-gradient(180deg,#f8fafc,#ffffff); }
-    .card { backdrop-filter: blur(6px); }
-    .drop-zone--over { border-color: #4f46e5; background: #f5f3ff; }
+    body { background-color: #1a1c1a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+    .card { background: #242624; border: 1px solid #323532; }
+    .input-field { background: #1a1c1a; border: 1px solid #3f423f; color: #e2e8f0; }
+    .input-field:focus { border-color: #5d6d5d; outline: none; }
+    .btn-primary { background: #3e4a3e; color: #d1d5db; transition: all 0.3s ease; }
+    .btn-primary:hover { background: #4d5d4d; color: #ffffff; }
+    .drop-zone--over { border-color: #8b9a8b; background: #2a2d2a; }
+    .accent-brown { color: #a39081; }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-6">
-  <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="card p-6 rounded-2xl shadow-lg bg-white/80 border border-slate-100">
-      <h1 class="text-2xl font-semibold mb-3">Slide Optimizer</h1>
-      <p class="text-sm text-slate-600 mb-6">Convert PPTX or PDF slides into a printable handout.</p>
+  <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+    
+    <div class="card p-8 rounded-lg shadow-2xl">
+      <h1 class="text-2xl font-light mb-1 tracking-tight">Slide <span class="accent-brown italic">Optimizer</span></h1>
+      <p class="text-xs text-slate-500 mb-8 uppercase tracking-widest">Handout Generation Tool</p>
 
-      <div id="dropZone" class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center cursor-pointer transition-all hover:border-indigo-400 mb-4">
-        <div class="text-3xl mb-2">📄</div>
-        <p class="text-sm font-medium text-slate-700" id="fileLabel">Click or drag PDF/PPTX here</p>
+      <div id="dropZone" class="border border-dashed border-zinc-700 rounded-md p-10 text-center cursor-pointer transition-all mb-6">
+        <p class="text-sm text-zinc-400" id="fileLabel">Drop PDF or PowerPoint</p>
         <input type="file" id="fileInput" class="hidden" accept=".pdf,.pptx,.ppt" />
       </div>
 
-      <div class="grid grid-cols-2 gap-4 mt-4">
+      <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700">Layout</label>
-          <select id="slidesPerPage" class="mt-1 block w-full rounded-md border-slate-200 shadow-sm text-sm">
-            <option value="1">1 Slide</option>
-            <option value="2">2 Slides</option>
-            <option value="4" selected>4 Slides</option>
-            <option value="6">6 Slides</option>
-          </select>
+          <label class="block text-xs font-semibold text-zinc-500 uppercase mb-1">Custom Output Name</label>
+          <input id="outName" type="text" placeholder="optimized_handout" class="input-field w-full p-3 rounded text-sm" />
         </div>
-        <div>
-          <label class="block text-sm font-medium text-slate-700">Quality (DPI)</label>
-          <input id="dpi" type="number" value="200" class="mt-1 block w-full rounded-md border-slate-200 shadow-sm text-sm" />
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-zinc-500 uppercase mb-1">Layout</label>
+            <select id="slidesPerPage" class="input-field w-full p-3 rounded text-sm appearance-none">
+              <option value="1">1 Slide</option>
+              <option value="2">2 Slides</option>
+              <option value="4" selected>4 Slides</option>
+              <option value="6">6 Slides</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-500 uppercase mb-1">DPI (Max 300)</label>
+            <input id="dpi" type="number" value="200" max="300" class="input-field w-full p-3 rounded text-sm" />
+          </div>
         </div>
       </div>
 
-      <button id="processBtn" class="w-full mt-6 px-4 py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow-md hover:bg-indigo-700 disabled:bg-slate-300 transition-all">
-        Optimize & Download
+      <button id="processBtn" class="btn-primary w-full mt-8 py-4 rounded font-medium text-sm tracking-widest uppercase">
+        Process Document
       </button>
 
-      <div id="status" class="mt-4 hidden text-center">
-        <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600 mr-2"></div>
-        <span class="text-sm text-slate-600">Processing file...</span>
+      <div id="status" class="mt-6 hidden text-center">
+        <span class="text-xs italic text-zinc-500 animate-pulse">Processing engine running...</span>
       </div>
     </div>
 
-    <div class="card p-6 rounded-2xl shadow-lg bg-white/80 border border-slate-100 flex flex-col justify-center">
-      <h2 class="text-lg font-semibold mb-2">Instructions</h2>
-      <ul class="text-sm text-slate-600 space-y-3">
-        <li class="flex gap-2"><span>✅</span> Supports .pptx, .ppt, and .pdf</li>
-        <li class="flex gap-2"><span>✅</span> Tiles multiple slides on one page</li>
-        <li class="flex gap-2"><span>✅</span> Optimized for 8.5x11" paper</li>
+    <div class="flex flex-col justify-center p-4 border-l border-zinc-800">
+      <h2 class="text-sm font-semibold uppercase tracking-widest mb-6 accent-brown">Capabilities</h2>
+      <ul class="space-y-6">
+        <li class="flex items-start gap-4">
+          <span class="text-zinc-600 text-xs">01</span>
+          <div>
+            <p class="text-sm font-medium">Multi-Format Support</p>
+            <p class="text-xs text-zinc-500">Native conversion for .pptx and .pdf using LibreOffice headless.</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="text-zinc-600 text-xs">02</span>
+          <div>
+            <p class="text-sm font-medium">Print Optimization</p>
+            <p class="text-xs text-zinc-500">Standard 8.5x11" output with smart scaling to eliminate white space.</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="text-zinc-600 text-xs">03</span>
+          <div>
+            <p class="text-sm font-medium">Safety Bounds</p>
+            <p class="text-xs text-zinc-500">Auto-capped quality to ensure fast processing and server stability.</p>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
@@ -89,27 +117,33 @@ HTML_TEMPLATE = """
     function handleFile(file) {
         selectedFile = file;
         $('fileLabel').textContent = file.name;
-        $('fileLabel').classList.add('text-indigo-600');
+        $('fileLabel').style.color = "#a39081";
     }
 
     $('processBtn').onclick = async () => {
-        if (!selectedFile) return alert("Select a file first");
+        if (!selectedFile) return alert("Select a file");
+        
+        let dpiVal = parseInt($('dpi').value);
+        if (dpiVal > 300) { alert("DPI capped at 300 for stability."); dpiVal = 300; }
+
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('slides_per_page', $('slidesPerPage').value);
-        formData.append('dpi', $('dpi').value);
+        formData.append('dpi', dpiVal);
+        formData.append('out_name', $('outName').value || "optimized_handout");
 
         $('status').classList.remove('hidden');
         $('processBtn').disabled = true;
 
         try {
             const response = await fetch('/optimize', { method: 'POST', body: formData });
-            if (!response.ok) throw new Error("Conversion failed");
+            if (!response.ok) throw new Error("Processing error");
+            
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "optimized_handout.pdf";
+            a.download = ($('outName').value || "optimized_handout") + ".pdf";
             a.click();
         } catch (err) { alert(err.message); }
         finally {
@@ -123,6 +157,8 @@ HTML_TEMPLATE = """
 """
 
 def process_file(input_pdf, output_pdf, slides_per_page, dpi):
+    # Enforce DPI cap on backend
+    dpi = min(int(dpi), 300)
     pdf_document = fitz.open(input_pdf)
     total_slides = len(pdf_document)
     images = []
@@ -157,7 +193,7 @@ def process_file(input_pdf, output_pdf, slides_per_page, dpi):
             x = margin + col*(cw+gap) + (cw-sw)/2
             y = page_height - margin - (row+1)*ch - row*gap + (ch-sh)/2
             c.drawImage(ImageReader(images[idx]), x, y, width=sw, height=sh)
-            c.setStrokeColorRGB(0.8, 0.8, 0.8)
+            c.setStrokeColorRGB(0.3, 0.3, 0.3) # Darker borders for minimalist look
             c.rect(x, y, sw, sh)
             idx += 1
         c.showPage()
@@ -170,6 +206,9 @@ def index():
 @app.route('/optimize', methods=['POST'])
 def optimize():
     file = request.files.get('file')
+    custom_name = secure_filename(request.form.get('out_name', 'output'))
+    if not custom_name: custom_name = "output"
+    
     filename = secure_filename(file.filename)
     input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(input_path)
@@ -178,10 +217,10 @@ def optimize():
         subprocess.run(['soffice', '--headless', '--convert-to', 'pdf', input_path, '--outdir', app.config['UPLOAD_FOLDER']], check=True)
         input_path = input_path.rsplit('.', 1)[0] + '.pdf'
 
-    output_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output.pdf')
-    process_file(input_path, output_path, request.form.get('slides_per_page'), int(request.form.get('dpi')))
-    return send_file(output_path, as_attachment=True)
+    output_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{custom_name}.pdf")
+    process_file(input_path, output_path, request.form.get('slides_per_page'), request.form.get('dpi'))
+    return send_file(output_path, as_attachment=True, download_name=f"{custom_name}.pdf")
 
 if __name__ == '__main__':
-    # Local dev fallback
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
